@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: love-neet
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/tests
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000

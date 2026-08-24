@@ -1,0 +1,10 @@
+{
+  "name": "@love-neet/workers",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "python -m app.main",
+    "lint": "python -m py_compile app/main.py app/extract_pdf.py app/extract_images.py",
+    "check": "python -m py_compile app/main.py app/extract_pdf.py app/extract_images.py"
+  }
+}

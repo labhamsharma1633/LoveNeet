@@ -1,0 +1,12 @@
+{
+  "name": "@love-neet/api",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "build": "echo 'API build placeholder'",
+    "lint": "echo 'API lint placeholder'",
+    "check": "echo 'API check placeholder'",
+    "typecheck": "echo 'API typecheck placeholder'"
+  }
+}
