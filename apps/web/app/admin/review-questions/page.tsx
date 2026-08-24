@@ -16,10 +16,12 @@ import {
   FileCheck2,
   Plus,
   Sparkles,
-  Trash2
+  Trash2,
+  Zap
 } from "lucide-react";
 import { Question } from "@/lib/types";
 import { NCERTReferenceBadge } from "@/components/NCERTReferenceBadge";
+import { QuestionVariationsModal } from "@/components/QuestionVariationsModal";
 
 export default function ReviewQuestionsPage() {
   const [drafts, setDrafts] = useState<Question[]>([]);
@@ -29,6 +31,8 @@ export default function ReviewQuestionsPage() {
   const [approving, setApproving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedVariationQuestion, setSelectedVariationQuestion] = useState<Question | null>(null);
+  const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/questions?type=draft")
@@ -242,10 +246,30 @@ export default function ReviewQuestionsPage() {
                           {q.diagramUrl && <span className="badge badge-purple">Has Diagram</span>}
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                           <span style={{ fontSize: "0.8125rem", color: "var(--success)", fontWeight: "700" }}>
                             +{q.marks} / -{q.negativeMarks} Marks
                           </span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedVariationQuestion(q);
+                              setIsVariationModalOpen(true);
+                            }}
+                            className="btn btn-sm"
+                            style={{
+                              backgroundColor: "rgba(13, 148, 136, 0.12)",
+                              color: "var(--teal)",
+                              border: "1.5px solid var(--teal)",
+                              fontSize: "0.75rem",
+                              fontWeight: "700"
+                            }}
+                            title="Generate 3 fresh variants of this question"
+                          >
+                            <Zap size={13} />
+                            <span>3 AI Variations</span>
+                          </button>
 
                           <button
                             onClick={() => handleEditClick(q)}
@@ -312,6 +336,13 @@ export default function ReviewQuestionsPage() {
         isOpen={isEditorOpen}
         onClose={() => setIsEditorOpen(false)}
         onSave={handleSaveQuestion}
+      />
+
+      {/* AI Question Variations Modal */}
+      <QuestionVariationsModal
+        baseQuestion={selectedVariationQuestion}
+        isOpen={isVariationModalOpen}
+        onClose={() => setIsVariationModalOpen(false)}
       />
 
       <Footer />

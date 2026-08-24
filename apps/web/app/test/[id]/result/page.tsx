@@ -19,10 +19,12 @@ import {
   HelpCircle,
   RotateCcw,
   Sparkles,
-  XCircle
+  XCircle,
+  Zap
 } from "lucide-react";
 import { EvaluationResult, Question, TestAttempt, TestConfig } from "@/lib/types";
 import { NCERTReferenceBadge } from "@/components/NCERTReferenceBadge";
+import { QuestionVariationsModal } from "@/components/QuestionVariationsModal";
 
 export default function TestResultPage({
   params
@@ -38,6 +40,8 @@ export default function TestResultPage({
   const [test, setTest] = useState<TestConfig | null>(null);
   const [activeFilter, setActiveFilter] = useState<"ALL" | "CORRECT" | "INCORRECT" | "UNATTEMPTED">("ALL");
   const [loading, setLoading] = useState(true);
+  const [selectedVariationQuestion, setSelectedVariationQuestion] = useState<Question | null>(null);
+  const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
 
   useEffect(() => {
     if (!attemptId) return;
@@ -269,7 +273,32 @@ export default function TestResultPage({
                         {q.ncertReference && <NCERTReferenceBadge reference={q.ncertReference} compact />}
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedVariationQuestion(q);
+                            setIsVariationModalOpen(true);
+                          }}
+                          className="btn btn-sm"
+                          style={{
+                            backgroundColor: !isCorrect ? "rgba(13, 148, 136, 0.12)" : "var(--canvas-soft-2)",
+                            color: !isCorrect ? "var(--teal)" : "var(--ink)",
+                            border: !isCorrect ? "1.5px solid var(--teal)" : "1px solid var(--hairline)",
+                            fontSize: "0.75rem",
+                            fontWeight: "700",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.35rem",
+                            cursor: "pointer",
+                            boxShadow: !isCorrect ? "0 2px 8px rgba(13, 148, 136, 0.2)" : "none"
+                          }}
+                          title="Generate and practice 3 new variations of this question"
+                        >
+                          <Zap size={13} color="var(--teal)" />
+                          <span>Practice 3 AI Variations</span>
+                        </button>
+
                         {isCorrect ? (
                           <span className="badge badge-green" style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
                             <CheckCircle2 size={14} /> Correct (+{q.marks})
@@ -409,6 +438,13 @@ export default function TestResultPage({
           </div>
         </div>
       </main>
+
+      {/* Interactive AI Question Variations Modal */}
+      <QuestionVariationsModal
+        baseQuestion={selectedVariationQuestion}
+        isOpen={isVariationModalOpen}
+        onClose={() => setIsVariationModalOpen(false)}
+      />
 
       <Footer />
     </>
