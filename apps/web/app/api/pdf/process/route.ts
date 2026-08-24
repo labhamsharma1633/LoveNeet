@@ -20,21 +20,22 @@ export async function POST(req: NextRequest) {
     store.addDraftQuestions(extractedDrafts);
 
     // Automatically create and publish a Live Test Session from the uploaded PDF
-    const cleanName = job.filename.replace(/\.pdf$/i, "").replace(/[_-]/g, " ");
-    const isYakeenOrChemistry = /yakeen|dpp|chemistry|concept/i.test(job.filename) || /yakeen|dpp|chemistry|concept/i.test(textToParse);
+    const cleanName = job.filename
+      .replace(/\.pdf$/i, "")
+      .replace(/[_-]+/g, " ")
+      .trim();
 
-    const testTitle = isYakeenOrChemistry
-      ? "Yakeen 2.0 2027 — Physical Chemistry (DPP 01: Some Basic Concepts of Chemistry)"
-      : `Auto-Generated Test: ${cleanName}`;
+    const formattedTitle = cleanName
+      ? cleanName.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+      : `NEET Assessment ${new Date().toLocaleDateString()}`;
 
-    const testCode = isYakeenOrChemistry
-      ? "YAKEEN-CHEM-DPP01"
-      : `TEST-PDF-${Date.now().toString().slice(-4)}`;
+    const testTitle = formattedTitle.length > 3 ? formattedTitle : `NEET Test: ${job.filename}`;
+    const testCode = `NEET-${cleanName.slice(0, 8).toUpperCase().replace(/\s+/g, "")}-${Date.now().toString().slice(-4)}`;
 
     const detectedSubjects = Array.from(new Set(extractedDrafts.map((q) => q.subject)));
 
     const autoCreatedTest: TestConfig = {
-      id: isYakeenOrChemistry ? "test-yakeen-chem-dpp01" : `test-pdf-${Date.now()}`,
+      id: `test-pdf-${Date.now()}`,
       title: testTitle,
       code: testCode,
       description: `Auto-generated test session from uploaded question paper: ${job.filename}. Includes ${extractedDrafts.length} MCQs with authentic NTA +4 / -1 negative marking.`,
