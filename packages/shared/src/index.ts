@@ -142,5 +142,6 @@ export interface PDFJob {
   progressPercent: number;
   errorMessage?: string;
   rawText?: string;
+  pdfBase64?: string;
   extractedQuestions: Question[];
 }

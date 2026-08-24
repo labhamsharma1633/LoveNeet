@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { parseMCQsFromText } from "@/lib/pdf-parser";
+import { extractMCQsWithGemini } from "@/lib/gemini";
 import { Question, TestConfig } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { jobId, manualText } = body;
+    const { jobId, manualText, apiKey } = body;
 
     const job = store.getPDFJobById(jobId);
     if (!job) {
@@ -14,7 +15,33 @@ export async function POST(req: NextRequest) {
     }
 
     const textToParse = manualText || job.rawText || "";
-    const extractedDrafts: Question[] = parseMCQsFromText(textToParse, job.filename);
+    let extractedDrafts: Question[] = [];
+    let extractionSource: "gemini_vision_ai" | "deterministic_parser" = "deterministic_parser";
+
+    // 1. Try Gemini Vision / Multimodal Extraction if API Key or document is available
+    try {
+      const geminiQuestions = await extractMCQsWithGemini(
+        {
+          text: textToParse,
+          pdfBase64: job.pdfBase64,
+          filename: job.filename
+        },
+        apiKey
+      );
+
+      if (geminiQuestions && geminiQuestions.length > 0) {
+        extractedDrafts = geminiQuestions;
+        extractionSource = "gemini_vision_ai";
+      }
+    } catch (aiErr) {
+      console.warn("Gemini AI extraction fallback to deterministic parser:", aiErr);
+    }
+
+    // 2. Fallback to deterministic parser if Gemini didn't extract or no key provided
+    if (extractedDrafts.length === 0) {
+      extractedDrafts = parseMCQsFromText(textToParse, job.filename);
+      extractionSource = "deterministic_parser";
+    }
 
     // Save questions to both draft queue and active question bank
     store.addDraftQuestions(extractedDrafts);
@@ -75,6 +102,7 @@ export async function POST(req: NextRequest) {
       job: updatedJob,
       extractedCount: extractedDrafts.length,
       extractedQuestions: extractedDrafts,
+      extractionSource,
       autoCreatedTest
     });
   } catch (err: any) {

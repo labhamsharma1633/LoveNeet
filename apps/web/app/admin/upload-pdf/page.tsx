@@ -26,6 +26,7 @@ import {
   Layers
 } from "lucide-react";
 import { PDFJob, Question, TestConfig } from "@/lib/types";
+import { useEffect } from "react";
 
 export default function UploadPDFPage() {
   const router = useRouter();
@@ -42,6 +43,19 @@ export default function UploadPDFPage() {
   const [autoCreatedTest, setAutoCreatedTest] = useState<TestConfig | null>(null);
   const [progress, setProgress] = useState(0);
   const [stepMessage, setStepMessage] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [showKeyConfig, setShowKeyConfig] = useState(false);
+  const [extractionSource, setExtractionSource] = useState<string>("");
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem("love_neet_gemini_key") || "";
+    if (savedKey) setGeminiApiKey(savedKey);
+  }, []);
+
+  const handleSaveGeminiKey = (key: string) => {
+    setGeminiApiKey(key);
+    localStorage.setItem("love_neet_gemini_key", key.trim());
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -175,7 +189,8 @@ export default function UploadPDFPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             jobId: job.id,
-            manualText: activeTab === "paste" ? pastedText : undefined
+            manualText: activeTab === "paste" ? pastedText : undefined,
+            apiKey: geminiApiKey || undefined
           })
         });
         const processData = await processRes.json();
@@ -184,6 +199,9 @@ export default function UploadPDFPage() {
         setStepMessage(`Extraction complete! ${processData.extractedCount} MCQs parsed & Live Test Session Published.`);
         setCurrentJob(processData.job);
         setExtractedPreview(processData.extractedQuestions || []);
+        if (processData.extractionSource) {
+          setExtractionSource(processData.extractionSource);
+        }
         if (processData.autoCreatedTest) {
           setAutoCreatedTest(processData.autoCreatedTest);
         }
@@ -245,6 +263,104 @@ export default function UploadPDFPage() {
               <p className="body-md">
                 Upload your question paper or DPP PDF. Our AI engine automatically extracts all MCQs, options, diagrams, and answer keys, and <strong>instantly creates & publishes a ready-to-take live test session</strong> for students!
               </p>
+
+              {/* Gemini AI Multi-Modal Engine Status Bar */}
+              <div
+                style={{
+                  marginTop: "1.25rem",
+                  padding: "1rem 1.25rem",
+                  borderRadius: "var(--radius-md)",
+                  backgroundColor: geminiApiKey ? "rgba(16, 185, 129, 0.08)" : "var(--canvas-soft-2)",
+                  border: geminiApiKey ? "1px solid #10b981" : "1px solid var(--hairline)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                    <Sparkles size={18} color={geminiApiKey ? "#10b981" : "var(--primary)"} />
+                    <span style={{ fontSize: "0.875rem", fontWeight: "700", color: "var(--ink)" }}>
+                      Universal AI Vision Extraction: {geminiApiKey ? "Active (Free Tier Enabled)" : "Default Engine Ready"}
+                    </span>
+                    {geminiApiKey ? (
+                      <span className="badge badge-teal" style={{ fontSize: "0.7rem", padding: "0.2rem 0.5rem" }}>
+                        ✓ Gemini 2.0 Connected
+                      </span>
+                    ) : (
+                      <span className="badge" style={{ fontSize: "0.7rem", padding: "0.2rem 0.5rem", backgroundColor: "var(--hairline-strong)" }}>
+                        Free Tier Ready
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyConfig(!showKeyConfig)}
+                    className="btn btn-ghost btn-sm"
+                    style={{ fontSize: "0.75rem", padding: "0.3rem 0.6rem", color: "var(--primary)" }}
+                  >
+                    {showKeyConfig ? "Hide Key Settings" : (geminiApiKey ? "Update API Key" : "⚙ Connect Free Gemini Key")}
+                  </button>
+                </div>
+
+                {showKeyConfig && (
+                  <div style={{ paddingTop: "0.5rem", borderTop: "1px solid var(--hairline)", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                    <div style={{ fontSize: "0.78rem", color: "var(--body)" }}>
+                      Enter your free Google Gemini API Key from{" "}
+                      <a
+                        href="https://aistudio.google.com/"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: "var(--primary)", textDecoration: "underline", fontWeight: "600" }}
+                      >
+                        Google AI Studio (100% Free • No Credit Card Required)
+                      </a>
+                      . With this key, any future scanned or multi-column PDF will be automatically parsed with zero code changes!
+                    </div>
+
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                      <input
+                        type="password"
+                        placeholder="Paste your Gemini API key (AIzaSy...)"
+                        value={geminiApiKey}
+                        onChange={(e) => handleSaveGeminiKey(e.target.value)}
+                        style={{
+                          flex: 1,
+                          minWidth: "240px",
+                          padding: "0.45rem 0.75rem",
+                          borderRadius: "var(--radius-xs)",
+                          border: "1px solid var(--hairline-strong)",
+                          fontSize: "0.8125rem",
+                          outline: "none"
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSaveGeminiKey(geminiApiKey);
+                          setShowKeyConfig(false);
+                        }}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Save Key
+                      </button>
+                      {geminiApiKey && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleSaveGeminiKey("");
+                          }}
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: "var(--danger)" }}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Mode Switcher Tabs */}
               {!processing && !currentJob?.extractedQuestionsCount && (
@@ -600,13 +716,20 @@ Answer: A`}
                         marginBottom: "2rem"
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
                         <span className="badge badge-teal" style={{ fontSize: "0.8rem", padding: "0.3rem 0.7rem" }}>
                           ✓ Live Test Session Published
                         </span>
-                        <span style={{ fontSize: "0.8125rem", color: "#166534", fontWeight: "700" }}>
-                          Instant Candidate Access Enabled
-                        </span>
+                        {extractionSource === "gemini_vision_ai" ? (
+                          <span className="badge badge-blue" style={{ fontSize: "0.8rem", padding: "0.3rem 0.7rem", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
+                            <Sparkles size={13} />
+                            <span>Parsed with Gemini Vision AI</span>
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: "0.8125rem", color: "#166534", fontWeight: "700" }}>
+                            Instant Candidate Access Enabled
+                          </span>
+                        )}
                       </div>
 
                       <h2 style={{ fontSize: "1.25rem", fontWeight: "800", color: "#14532d", marginBottom: "0.5rem" }}>

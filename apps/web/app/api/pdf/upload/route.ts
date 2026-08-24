@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     let filename = "NEET_Problem_Set_2025.pdf";
     let filesize = 2097152;
     let extractedRawText = "";
+    let pdfBase64 = "";
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+        // Only convert to base64 if under 20MB to avoid excessive memory
+        if (filesize < 20 * 1024 * 1024) {
+          pdfBase64 = buffer.toString("base64");
+        }
         try {
           extractedRawText = await extractPDFWithPythonWorker(buffer, filename);
         } catch (err) {
@@ -43,6 +48,7 @@ export async function POST(req: NextRequest) {
       if (body.filename) filename = body.filename;
       if (body.filesize) filesize = body.filesize;
       if (body.text) extractedRawText = body.text;
+      if (body.pdfBase64) pdfBase64 = body.pdfBase64;
     }
 
     const newJob: PDFJob = {
@@ -55,6 +61,7 @@ export async function POST(req: NextRequest) {
       extractedQuestionsCount: 0,
       progressPercent: 25,
       rawText: extractedRawText,
+      pdfBase64: pdfBase64 || undefined,
       extractedQuestions: []
     };
 
