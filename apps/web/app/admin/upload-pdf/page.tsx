@@ -83,15 +83,63 @@ export default function UploadPDFPage() {
     }
   };
 
+  const extractClientPDFText = async (file: File): Promise<string> => {
+    try {
+      if (typeof window === "undefined") return "";
+
+      if (!(window as any).pdfjsLib) {
+        await new Promise<void>((resolve) => {
+          const script = document.createElement("script");
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+          script.onload = () => {
+            try {
+              (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            } catch {}
+            resolve();
+          };
+          script.onerror = () => resolve();
+          document.head.appendChild(script);
+        });
+      }
+
+      const pdfjsLib = (window as any).pdfjsLib;
+      if (!pdfjsLib) return "";
+
+      const buffer = await file.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({ data: buffer });
+      const pdf = await loadingTask.promise;
+      let fullText = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map((item: any) => item.str || "").filter(Boolean);
+        fullText += `\n\n--- Page ${i} ---\n` + strings.join(" ");
+      }
+      return fullText.trim();
+    } catch (err) {
+      console.warn("Client PDF extraction warning:", err);
+      return "";
+    }
+  };
+
   const handleUploadAndProcess = async (sampleFileName?: string) => {
     setUploading(true);
     setProgress(15);
-    setStepMessage("Uploading PDF and extracting text streams...");
+    setStepMessage("Decoding PDF fonts & extracting question text streams...");
 
     try {
       const formData = new FormData();
       if (activeTab === "file" && selectedFile && !sampleFileName) {
         formData.append("pdf", selectedFile);
+        formData.append("filename", selectedFile.name);
+
+        // Perform client-side high-precision Unicode font rendering
+        const clientText = await extractClientPDFText(selectedFile);
+        if (clientText && clientText.length > 20) {
+          formData.append("text", clientText);
+        }
       } else if (activeTab === "paste" && pastedText.trim()) {
         formData.append("text", pastedText.trim());
       } else {
