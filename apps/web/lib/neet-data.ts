@@ -1,5 +1,6 @@
 import { Question, TestConfig } from "./types";
 import { YAKEEN_CHEMISTRY_DPP1_QUESTIONS } from "./pdf-parser";
+import { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS } from "./yakeen-test01-data";
 
 export const SAMPLE_NEET_QUESTIONS: Question[] = [
   // ─── ZOOLOGY & HUMAN PHYSIOLOGY ───
@@ -413,5 +414,31 @@ export const DEFAULT_TESTS: TestConfig[] = [
     status: "published",
     createdAt: "2026-08-24T04:00:00Z",
     questions: YAKEEN_CHEMISTRY_DPP1_QUESTIONS
+  },
+  {
+    id: "test-yakeen-neet-2027-pt01",
+    title: "Yakeen NEET 2.0 (2027) — Practice Test 01 (Full Syllabus: 180 Questions)",
+    code: "YAKEEN-NEET-2027-PT01",
+    description:
+      "Official 180-question mock test booklet (720 Marks, 180 Minutes). Covers Physics (Basic Maths & Calculus), Chemistry (Some Basic Concepts of Chemistry), Botany (Cell - The Unit of Life), and Zoology (Structural Organisation in Animals).",
+    instructions: [
+      "Total duration: 180 minutes for 180 questions (45 questions in each subject).",
+      "Total Maximum Marks: 720.",
+      "Marking Scheme: +4 marks for each correct response, -1 mark deducted for incorrect response, 0 marks for unattempted.",
+      "Subject Distribution: Physics (Q1-45), Chemistry (Q46-90), Botany (Q91-135), Zoology (Q136-180).",
+      "Each subject has Section A (35 questions) and Section B (10 questions).",
+      "Calculators, mobile devices, and tables are strictly prohibited."
+    ],
+    totalQuestions: 180,
+    totalMarks: 720,
+    durationMinutes: 180,
+    positiveMarks: 4,
+    negativeMarks: 1,
+    passingMarks: 360,
+    subjects: ["Physics", "Chemistry", "Botany", "Zoology"],
+    pattern: "NTA_NEET_2025",
+    status: "published",
+    createdAt: "2026-08-24T12:00:00Z",
+    questions: YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS
   }
 ];

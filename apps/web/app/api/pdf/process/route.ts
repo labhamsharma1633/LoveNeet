@@ -32,27 +32,30 @@ export async function POST(req: NextRequest) {
     const testTitle = formattedTitle.length > 3 ? formattedTitle : `NEET Test: ${job.filename}`;
     const testCode = `NEET-${cleanName.slice(0, 8).toUpperCase().replace(/\s+/g, "")}-${Date.now().toString().slice(-4)}`;
 
+    const isFullMock = extractedDrafts.length >= 90;
     const detectedSubjects = Array.from(new Set(extractedDrafts.map((q) => q.subject)));
 
     const autoCreatedTest: TestConfig = {
-      id: `test-pdf-${Date.now()}`,
-      title: testTitle,
-      code: testCode,
-      description: `Auto-generated test session from uploaded question paper: ${job.filename}. Includes ${extractedDrafts.length} MCQs with authentic NTA +4 / -1 negative marking.`,
+      id: isFullMock ? `test-yakeen-neet-2027-pt01` : `test-pdf-${Date.now()}`,
+      title: isFullMock
+        ? `Yakeen NEET 2.0 (2027) — Practice Test 01 (Full Mock: ${extractedDrafts.length} Questions)`
+        : (testTitle.length > 3 ? testTitle : `NEET Test: ${job.filename}`),
+      code: isFullMock ? `YAKEEN-NEET-2027-PT01` : testCode,
+      description: `Auto-generated live test session from uploaded question paper: ${job.filename}. Includes ${extractedDrafts.length} authentic MCQs across ${detectedSubjects.join(", ")} with NTA +4 / -1 negative marking scheme.`,
       instructions: [
-        `Total questions: ${extractedDrafts.length}. Attempt all questions.`,
+        `Total questions: ${extractedDrafts.length}. Attempt all questions across ${detectedSubjects.join(", ")}.`,
         "Marking Scheme: +4 marks for correct answers, -1 mark deducted for incorrect answers, 0 marks for unattempted.",
         "The test will automatically submit upon countdown timer expiration.",
         "Calculators and reference sheets are strictly prohibited."
       ],
       totalQuestions: extractedDrafts.length,
       totalMarks: extractedDrafts.length * 4,
-      durationMinutes: Math.max(25, Math.ceil(extractedDrafts.length * 1.8)),
+      durationMinutes: isFullMock ? 180 : Math.max(25, Math.ceil(extractedDrafts.length * 1.8)),
       positiveMarks: 4,
       negativeMarks: 1,
-      passingMarks: Math.floor(extractedDrafts.length * 4 * 0.45),
-      subjects: detectedSubjects.length > 0 ? (detectedSubjects as any) : ["Chemistry"],
-      pattern: "UNIT_TEST",
+      passingMarks: Math.floor(extractedDrafts.length * 4 * 0.5),
+      subjects: detectedSubjects.length > 0 ? (detectedSubjects as any) : ["Physics", "Chemistry", "Botany", "Zoology"],
+      pattern: isFullMock ? "NTA_NEET_2025" : "UNIT_TEST",
       status: "published",
       createdAt: new Date().toISOString(),
       questions: extractedDrafts

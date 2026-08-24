@@ -447,41 +447,88 @@ Answer: A`}
                   </div>
                 )}
 
-                {/* Quick 1-Click Sample Button */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "1.25rem",
-                    backgroundColor: "var(--canvas-soft-2)",
-                    borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--hairline)",
-                    flexWrap: "wrap",
-                    gap: "1rem"
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <FileText size={24} color="var(--teal)" />
-                    <div>
-                      <div style={{ fontSize: "0.925rem", fontWeight: "700", color: "var(--ink)" }}>
-                        Or test with sample: NEET_Yakeen_2.0_2027_DPP_1.pdf
+                {/* Quick 1-Click Sample Buttons */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "1.25rem",
+                      backgroundColor: "var(--primary-surface)",
+                      borderRadius: "var(--radius-md)",
+                      border: "1.5px solid var(--primary-light)",
+                      flexWrap: "wrap",
+                      gap: "1rem"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "10px",
+                          backgroundColor: "var(--primary)",
+                          color: "#ffffff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <Sparkles size={20} />
                       </div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--mute)" }}>
-                        23 Physical Chemistry Questions • Sudhanshu Kumar Sir • Full Answer Key
+                      <div>
+                        <div style={{ fontSize: "0.95rem", fontWeight: "800", color: "var(--ink)" }}>
+                          Yakeen NEET 2.0 (2027) — Practice Test 01 (Full 180 Questions)
+                        </div>
+                        <div style={{ fontSize: "0.78rem", color: "var(--body)", marginTop: "0.15rem" }}>
+                          Physics (45 Qs) • Chemistry (45 Qs) • Botany (45 Qs) • Zoology (45 Qs) • 720 Marks • 180 Mins
+                        </div>
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleUploadAndProcess("Yakeen_NEET_2.0_2027_Practice_Test_01.pdf")}
+                      disabled={uploading}
+                      className="btn btn-primary btn-sm"
+                      style={{ fontWeight: "700" }}
+                    >
+                      <Cpu size={14} />
+                      <span>Auto-Create 180Q Live Mock Test</span>
+                    </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleUploadAndProcess("NEET_Yakeen_2.0_2027_DPP_1.pdf")}
-                    disabled={uploading}
-                    className="btn btn-teal btn-sm"
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "1rem 1.25rem",
+                      backgroundColor: "var(--canvas-soft-2)",
+                      borderRadius: "var(--radius-md)",
+                      border: "1px solid var(--hairline)",
+                      flexWrap: "wrap",
+                      gap: "0.75rem"
+                    }}
                   >
-                    <Cpu size={14} />
-                    <span>Auto-Create Sample Test</span>
-                  </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                      <FileText size={18} color="var(--teal)" />
+                      <div style={{ fontSize: "0.85rem", color: "var(--ink)", fontWeight: "600" }}>
+                        Sample DPP: NEET_Yakeen_2.0_2027_DPP_1.pdf (23 Physical Chemistry Questions)
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleUploadAndProcess("NEET_Yakeen_2.0_2027_DPP_1.pdf")}
+                      disabled={uploading}
+                      className="btn btn-teal btn-sm"
+                    >
+                      <Cpu size={14} />
+                      <span>Parse DPP Sample</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -600,13 +647,30 @@ Answer: A`}
 
                     {/* Extracted Questions Preview Box */}
                     <div style={{ backgroundColor: "var(--canvas-soft-2)", padding: "1.25rem", borderRadius: "var(--radius-md)", marginBottom: "2rem", border: "1px solid var(--hairline)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
                         <span style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--ink)" }}>
                           Extracted MCQs in this Test ({extractedPreview.length} Questions):
                         </span>
                         <Link href="/admin/review-questions" className="btn btn-ghost btn-sm" style={{ color: "var(--primary)" }}>
                           Open Staging Editor
                         </Link>
+                      </div>
+
+                      {/* Subject breakdown pills */}
+                      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                        {["Physics", "Chemistry", "Botany", "Zoology"].map((subj) => {
+                          const count = extractedPreview.filter((q) => q.subject === subj).length;
+                          if (count === 0) return null;
+                          return (
+                            <span
+                              key={subj}
+                              className="badge badge-teal"
+                              style={{ fontSize: "0.75rem", padding: "0.25rem 0.65rem", fontWeight: "700" }}
+                            >
+                              {subj}: {count} Questions
+                            </span>
+                          );
+                        })}
                       </div>
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", maxHeight: "200px", overflowY: "auto" }}>
