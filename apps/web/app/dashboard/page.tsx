@@ -171,6 +171,52 @@ export default function CandidateDashboard() {
             </div>
           </div>
 
+          {/* College Predictor Quick Access Banner */}
+          <div
+            className="card"
+            style={{
+              padding: "1.5rem 2rem",
+              marginBottom: "2.5rem",
+              background: "linear-gradient(135deg, #0f766e 0%, #0369a1 100%)",
+              color: "#ffffff",
+              borderRadius: "var(--radius-xl)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "1.5rem",
+              boxShadow: "0 10px 25px -5px rgba(15, 118, 110, 0.25)"
+            }}
+          >
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", padding: "0.25rem 0.6rem", backgroundColor: "rgba(255, 255, 255, 0.2)", borderRadius: "var(--radius-pill)", fontSize: "0.75rem", fontWeight: "700", marginBottom: "0.5rem" }}>
+                <Sparkles size={13} />
+                <span>AIIMS, MAMC & State GMCs</span>
+              </div>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "#ffffff", margin: "0 0 0.25rem 0" }}>
+                Check Your NEET 2026 Medical College & AIR Chances
+              </h3>
+              <p style={{ fontSize: "0.85rem", color: "rgba(255, 255, 255, 0.9)", margin: 0 }}>
+                Simulate scores from 300 to 720 to see authentic closing ranks and admission probabilities by category & quota.
+              </p>
+            </div>
+
+            <Link
+              href="/college-predictor"
+              className="btn btn-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                color: "#0f766e",
+                fontWeight: "800",
+                fontSize: "0.85rem",
+                padding: "0.6rem 1.25rem",
+                borderRadius: "var(--radius-md)"
+              }}
+            >
+              <span>Launch College Predictor 🏥</span>
+            </Link>
+          </div>
+
           {/* Test Series Filter Tabs */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
             <h2 className="display-sm" style={{ color: "var(--ink)" }}>

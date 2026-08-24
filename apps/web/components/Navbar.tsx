@@ -148,6 +148,24 @@ export function Navbar() {
           </Link>
 
           <Link
+            href="/college-predictor"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+              color: "#0f766e",
+              padding: "0.4rem 0.6rem",
+              borderRadius: "var(--radius-sm)",
+              backgroundColor: "rgba(15, 118, 110, 0.08)"
+            }}
+          >
+            <Sparkles size={16} color="#0f766e" />
+            <span>College Predictor</span>
+          </Link>
+
+          <Link
             href="/admin/upload-pdf"
             style={{
               display: "flex",
@@ -161,7 +179,7 @@ export function Navbar() {
               backgroundColor: "var(--teal-light)"
             }}
           >
-            <Sparkles size={16} />
+            <FileText size={16} />
             <span>PDF to MCQ</span>
           </Link>
         </nav>

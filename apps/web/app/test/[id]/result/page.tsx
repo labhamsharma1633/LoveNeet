@@ -25,6 +25,7 @@ import {
 import { EvaluationResult, Question, TestAttempt, TestConfig } from "@/lib/types";
 import { NCERTReferenceBadge } from "@/components/NCERTReferenceBadge";
 import { QuestionVariationsModal } from "@/components/QuestionVariationsModal";
+import { predictEligibleColleges, predictRankAndPercentile } from "@/lib/college-data";
 
 export default function TestResultPage({
   params
@@ -177,9 +178,90 @@ export default function TestResultPage({
           </div>
 
           {/* Performance Charts & Metrics */}
-          <div style={{ marginBottom: "3rem" }}>
+          <div style={{ marginBottom: "2rem" }}>
             <PerformanceCharts result={result} />
           </div>
+
+          {/* Predicted Medical Colleges Banner */}
+          {(() => {
+            const pred = predictEligibleColleges(result.finalScore, "general", "aiq_15");
+            const topColleges = pred.topMatches.highChance.slice(0, 3);
+
+            return (
+              <div
+                className="card"
+                style={{
+                  padding: "1.75rem 2rem",
+                  marginBottom: "2.5rem",
+                  borderRadius: "var(--radius-xl)",
+                  border: "1.5px solid #0d9488",
+                  background: "linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%)",
+                  boxShadow: "0 4px 20px rgba(13, 148, 136, 0.08)"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.25rem" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                      <span className="badge badge-teal" style={{ fontSize: "0.75rem" }}>
+                        🏥 NEET 2026 College Predictor
+                      </span>
+                      <span style={{ fontSize: "0.85rem", fontWeight: "800", color: "var(--primary)" }}>
+                        Estimated {pred.estimatedAirRange} ({pred.estimatedPercentile}%ile)
+                      </span>
+                    </div>
+                    <h3 style={{ fontSize: "1.2rem", fontWeight: "800", color: "var(--ink)", margin: 0 }}>
+                      Your Predicted Government Medical Colleges
+                    </h3>
+                  </div>
+
+                  <Link
+                    href={`/college-predictor`}
+                    className="btn btn-primary btn-sm"
+                    style={{ backgroundColor: "var(--teal)", borderColor: "var(--teal)" }}
+                  >
+                    <Sparkles size={14} />
+                    <span>Explore All 30+ Eligible Colleges</span>
+                  </Link>
+                </div>
+
+                {topColleges.length > 0 ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+                    {topColleges.map((col) => (
+                      <div
+                        key={col.id}
+                        style={{
+                          padding: "1rem 1.25rem",
+                          backgroundColor: "#ffffff",
+                          borderRadius: "var(--radius-md)",
+                          border: "1px solid #99f6e4",
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.04)"
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                          <span style={{ fontSize: "0.7rem", fontWeight: "700", color: "#0f766e" }}>
+                            {col.tier.split(" ")[0]}
+                          </span>
+                          <span style={{ fontSize: "0.75rem", fontWeight: "800", color: "#166534" }}>
+                            ₹{col.annualFeeInr.toLocaleString()}/yr
+                          </span>
+                        </div>
+                        <h4 style={{ fontSize: "0.95rem", fontWeight: "800", color: "var(--ink)", margin: "0 0 0.2rem 0" }}>
+                          {col.shortName}
+                        </h4>
+                        <div style={{ fontSize: "0.75rem", color: "var(--mute)" }}>
+                          {col.city}, {col.state} • {col.totalSeats} Seats
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: "1rem", backgroundColor: "#fffbeb", borderRadius: "var(--radius-sm)", border: "1px solid #fde68a", fontSize: "0.85rem", color: "#92400e" }}>
+                    <strong>Next Target:</strong> Improve mock test score by <strong>+20 to +40 marks</strong> using AI Question Variations to unlock Top State Government Medical Colleges!
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Question-By-Question Solution Review Section */}
           <div className="card" style={{ padding: "2rem" }}>
