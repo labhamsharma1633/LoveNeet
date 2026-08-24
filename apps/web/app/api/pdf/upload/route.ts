@@ -27,7 +27,12 @@ export async function POST(req: NextRequest) {
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        extractedRawText = await extractPDFWithPythonWorker(buffer, filename);
+        try {
+          extractedRawText = await extractPDFWithPythonWorker(buffer, filename);
+        } catch (err) {
+          console.warn("Buffer extraction fallback:", err);
+          extractedRawText = "";
+        }
       }
 
       if (directText && directText.trim()) {

@@ -3,8 +3,6 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import fs from "fs";
-// @ts-ignore
-const pdfParse = require("pdf-parse");
 import { Question, QuestionOption, NEETSubject, QuestionDifficulty } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -863,17 +861,37 @@ export async function extractPDFWithPythonWorker(buffer: Buffer, filename: strin
   return cleanRawExtractedText(await extractTextFromPDFBuffer(buffer));
 }
 
+async function loadPDFParseClass() {
+  try {
+    const mod = await import("pdf-parse");
+    return mod.PDFParse || (mod as any).default?.PDFParse || (mod as any).default;
+  } catch (err) {
+    try {
+      // @ts-ignore
+      const reqMod = eval("require")("pdf-parse");
+      return reqMod.PDFParse || reqMod.default?.PDFParse || reqMod.default;
+    } catch {}
+  }
+  return null;
+}
+
 /**
  * In-process PDF Stream Decompressor
  */
 export async function extractTextFromPDFBuffer(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdfParse(buffer);
-    if (data && data.text && data.text.trim().length > 10) {
-      return cleanRawExtractedText(data.text);
+    const PDFParserClass = await loadPDFParseClass();
+    if (PDFParserClass && typeof PDFParserClass === "function") {
+      const parser = new PDFParserClass({ data: buffer });
+      if (typeof parser.getText === "function") {
+        const data = await parser.getText();
+        if (data && data.text && data.text.trim().length > 10) {
+          return cleanRawExtractedText(data.text);
+        }
+      }
     }
   } catch (err) {
-    console.warn("pdfParse fallback to stream decompression:", err);
+    console.warn("PDFParse fallback to stream decompression:", err);
   }
 
   try {
