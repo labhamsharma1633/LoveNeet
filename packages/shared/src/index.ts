@@ -30,6 +30,16 @@ export interface QuestionOption {
   imageUrl?: string;
 }
 
+export interface NCERTReference {
+  book: string; // e.g. "Class 11 Biology" | "Class 12 Biology" | "Class 11 Chemistry Part 1" | "Class 12 Chemistry Part 1" | "Class 11 Physics Part 1"
+  chapterName: string;
+  chapterNumber: number;
+  pageNumber?: number | string;
+  paragraphOrTopic?: string;
+  exactLineQuote?: string;
+  edition?: string;
+}
+
 export interface Question {
   id: string;
   questionNumber: number;
@@ -46,6 +56,7 @@ export interface Question {
   difficulty: QuestionDifficulty;
   explanation: string;
   clinicalNote?: string;
+  ncertReference?: NCERTReference;
   sourcePage?: number;
   isAiExtracted?: boolean;
   reviewedByAdmin?: boolean;

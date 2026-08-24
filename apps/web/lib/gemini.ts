@@ -1,4 +1,5 @@
-import { Question, QuestionDifficulty, NEETSection, NEETSubject } from "./types";
+import { Question, QuestionDifficulty, NEETSection, NEETSubject, NCERTReference } from "./types";
+import { resolveNCERTReference } from "./ncert-mapper";
 
 interface GeminiExtractionInput {
   text?: string;
@@ -21,6 +22,14 @@ interface RawGeminiMCQ {
   negativeMarks?: number;
   difficulty?: string;
   explanation?: string;
+  ncertReference?: {
+    book?: string;
+    chapterName?: string;
+    chapterNumber?: number;
+    pageNumber?: number | string;
+    paragraphOrTopic?: string;
+    exactLineQuote?: string;
+  };
 }
 
 /**
@@ -56,6 +65,13 @@ For every question:
 7. "correctOption": The correct answer label ("A", "B", "C", or "D") from the answer key or derived by expert solution.
 8. "difficulty": "easy", "medium", or "hard".
 9. "explanation": A thorough, step-by-step NCERT-based medical/physical reasoning or calculation explaining why that answer is correct.
+10. "ncertReference": The exact NCERT Class 11/12 textbook reference:
+    - "book": "Class 11 Biology" / "Class 12 Biology" / "Class 11 Chemistry Part 1" / "Class 11 Physics Part 1", etc.
+    - "chapterName": Official NCERT chapter title
+    - "chapterNumber": Chapter number integer
+    - "pageNumber": Exact page number in the NCERT textbook
+    - "paragraphOrTopic": The subtopic or section name
+    - "exactLineQuote": The authentic textbook sentence/principle from NCERT.
 
 Output strictly valid JSON matching this schema:
 {
@@ -74,7 +90,15 @@ Output strictly valid JSON matching this schema:
       ],
       "correctOption": "A",
       "difficulty": "medium",
-      "explanation": "Step by step solution..."
+      "explanation": "Step by step solution...",
+      "ncertReference": {
+        "book": "Class 11 Physics Part 1",
+        "chapterName": "Mathematical Tools Appendix",
+        "chapterNumber": 1,
+        "pageNumber": 5,
+        "paragraphOrTopic": "Calculus",
+        "exactLineQuote": "The derivative dy/dx gives the instantaneous rate of change."
+      }
     }
   ]
 }
@@ -199,6 +223,17 @@ Output strictly valid JSON matching this schema:
       const matchedOpt = formattedOptions.find((o) => o.label === correctLabel);
       const correctOptionId = matchedOpt?.id || formattedOptions[0]?.id || `opt-${qNum}-a`;
 
+      const ncertRef: NCERTReference | undefined = q.ncertReference?.book
+        ? {
+            book: q.ncertReference.book || "Class 11 Biology",
+            chapterName: q.ncertReference.chapterName || "NCERT Core Topic",
+            chapterNumber: Number(q.ncertReference.chapterNumber) || 1,
+            pageNumber: q.ncertReference.pageNumber || 1,
+            paragraphOrTopic: q.ncertReference.paragraphOrTopic,
+            exactLineQuote: q.ncertReference.exactLineQuote
+          }
+        : resolveNCERTReference(q.text, subj, q.topic);
+
       return {
         id: `gemini-q-${Date.now()}-${qNum}`,
         questionNumber: qNum,
@@ -212,6 +247,7 @@ Output strictly valid JSON matching this schema:
         negativeMarks: q.negativeMarks || 1,
         difficulty: diff,
         explanation: q.explanation || "Extracted via Gemini Vision AI. Standard NTA NEET marking scheme.",
+        ncertReference: ncertRef,
         sourcePage: Math.ceil(qNum / 10),
         isAiExtracted: true,
         reviewedByAdmin: false

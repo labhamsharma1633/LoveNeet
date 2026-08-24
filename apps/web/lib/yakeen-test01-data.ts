@@ -1,6 +1,7 @@
 import { Question } from "./types";
+import { resolveNCERTReference } from "./ncert-mapper";
 
-export const YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS: Question[] = [
+const RAW_QUESTIONS: Question[] = [
   // =========================================================================
   // ─── PHYSICS (Q1 to Q45) ───
   // Topics: Basic Maths & Calculus, Mathematical Tools
@@ -3989,3 +3990,8 @@ export const YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS: Question[] = [
     reviewedByAdmin: true
   }
 ];
+
+export const YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS: Question[] = RAW_QUESTIONS.map((q) => ({
+  ...q,
+  ncertReference: q.ncertReference || resolveNCERTReference(q.text, q.subject, q.topic)
+}));

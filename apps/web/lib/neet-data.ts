@@ -1,8 +1,9 @@
 import { Question, TestConfig } from "./types";
 import { YAKEEN_CHEMISTRY_DPP1_QUESTIONS } from "./pdf-parser";
 import { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS } from "./yakeen-test01-data";
+import { resolveNCERTReference } from "./ncert-mapper";
 
-export const SAMPLE_NEET_QUESTIONS: Question[] = [
+const RAW_SAMPLE_QUESTIONS: Question[] = [
   // ─── ZOOLOGY & HUMAN PHYSIOLOGY ───
   {
     id: "q-zoo-001",
@@ -317,6 +318,11 @@ export const SAMPLE_NEET_QUESTIONS: Question[] = [
     sourcePage: 45
   }
 ];
+
+export const SAMPLE_NEET_QUESTIONS: Question[] = RAW_SAMPLE_QUESTIONS.map((q) => ({
+  ...q,
+  ncertReference: q.ncertReference || resolveNCERTReference(q.text, q.subject, q.topic)
+}));
 
 export const DEFAULT_TESTS: TestConfig[] = [
   {

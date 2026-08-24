@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import { Question, QuestionOption, NEETSubject, QuestionDifficulty } from "./types";
 import { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS } from "./yakeen-test01-data";
+import { resolveNCERTReference } from "./ncert-mapper";
 
 export { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS };
 
@@ -1778,6 +1779,7 @@ function parseSingleQuestionBlock(
     negativeMarks: 1,
     difficulty: "medium" as QuestionDifficulty,
     explanation: `Extracted from ${filename}. Standard NTA NEET pattern.`,
+    ncertReference: resolveNCERTReference(questionText, subject, topic),
     sourcePage: Math.ceil(qNumber / 10),
     isAiExtracted: true,
     reviewedByAdmin: false

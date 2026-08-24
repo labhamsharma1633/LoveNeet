@@ -22,6 +22,7 @@ import {
   XCircle
 } from "lucide-react";
 import { EvaluationResult, Question, TestAttempt, TestConfig } from "@/lib/types";
+import { NCERTReferenceBadge } from "@/components/NCERTReferenceBadge";
 
 export default function TestResultPage({
   params
@@ -258,13 +259,14 @@ export default function TestResultPage({
                   >
                     {/* Question Header */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                         <strong style={{ fontSize: "1rem", color: "var(--ink)" }}>
                           Q{q.questionNumber || idx + 1}.
                         </strong>
                         <span className="badge badge-blue">{q.subject}</span>
                         <span className="badge badge-teal">{q.section}</span>
                         <span className="badge badge-gray">{q.topic}</span>
+                        {q.ncertReference && <NCERTReferenceBadge reference={q.ncertReference} compact />}
                       </div>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -388,6 +390,15 @@ export default function TestResultPage({
                           }}
                         >
                           {q.clinicalNote}
+                        </div>
+                      )}
+
+                      {q.ncertReference && (
+                        <div style={{ marginTop: "0.85rem" }}>
+                          <div style={{ fontSize: "0.75rem", fontWeight: "700", color: "#166534", marginBottom: "0.35rem" }}>
+                            Official NCERT Line-by-Line Textbook Citation:
+                          </div>
+                          <NCERTReferenceBadge reference={q.ncertReference} />
                         </div>
                       )}
                     </div>

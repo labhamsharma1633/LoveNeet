@@ -19,6 +19,7 @@ import {
   Trash2
 } from "lucide-react";
 import { Question } from "@/lib/types";
+import { NCERTReferenceBadge } from "@/components/NCERTReferenceBadge";
 
 export default function ReviewQuestionsPage() {
   const [drafts, setDrafts] = useState<Question[]>([]);
@@ -230,13 +231,14 @@ export default function ReviewQuestionsPage() {
                     >
                       {/* Top Bar */}
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                           <span style={{ fontSize: "1rem", fontWeight: "800", color: "var(--ink)" }}>
                             Question #{q.questionNumber || idx + 1}
                           </span>
                           <span className="badge badge-blue">{q.subject}</span>
                           <span className="badge badge-teal">{q.section}</span>
                           <span className="badge badge-gray">{q.topic}</span>
+                          {q.ncertReference && <NCERTReferenceBadge reference={q.ncertReference} compact />}
                           {q.diagramUrl && <span className="badge badge-purple">Has Diagram</span>}
                         </div>
 

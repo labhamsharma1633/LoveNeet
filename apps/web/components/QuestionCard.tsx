@@ -3,6 +3,7 @@
 import { Question, QuestionResponse } from "@/lib/types";
 import { Bookmark, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, ZoomIn } from "lucide-react";
 import { useState } from "react";
+import { NCERTReferenceBadge } from "./NCERTReferenceBadge";
 
 interface QuestionCardProps {
   question: Question;
@@ -58,7 +59,7 @@ export function QuestionCard({
           backgroundColor: "var(--canvas-soft)"
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
           <span style={{ fontSize: "1.125rem", fontWeight: "800", color: "var(--ink)" }}>
             Question {currentIndex + 1}
             <span style={{ fontSize: "0.875rem", color: "var(--mute)", fontWeight: "500" }}>
@@ -68,6 +69,7 @@ export function QuestionCard({
           <span className="badge badge-blue">{question.subject}</span>
           <span className="badge badge-teal">{question.section}</span>
           <span className="badge badge-gray">{question.topic}</span>
+          {question.ncertReference && <NCERTReferenceBadge reference={question.ncertReference} compact />}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
