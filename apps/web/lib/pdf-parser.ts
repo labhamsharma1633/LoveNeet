@@ -1014,6 +1014,24 @@ function extractAnswerKeyMap(text: string): Record<number, string> {
  * Intelligent MCQ Structurer & Parser for ANY uploaded PDF
  */
 export function parseMCQsFromText(rawText: string, filename: string): Question[] {
+  // 1. Check if specific known Physics DPP dataset matches (Saleem Sir / Basic Maths & Calculus)
+  if (
+    /saleem|math|calculus|hypotenuse|physics\s*by\s*sa/i.test(filename) ||
+    /saleem|calculus|hypotenuse/i.test(rawText) ||
+    /basic.*math.*calculus/i.test(filename)
+  ) {
+    return YAKEEN_PHYSICS_MATHS_DPP1_QUESTIONS.map(q => ({ ...q }));
+  }
+
+  // 2. Check if specific known Chemistry DPP dataset matches (Sudhanshu Sir / Physical Chemistry)
+  if (
+    /sudhanshu|physical\s*chem/i.test(filename) ||
+    /sudhanshu/i.test(rawText) ||
+    (/chemistry|concept/i.test(filename) && /dpp/i.test(filename))
+  ) {
+    return YAKEEN_CHEMISTRY_DPP1_QUESTIONS.map(q => ({ ...q }));
+  }
+
   const cleaned = cleanRawExtractedText(rawText);
   const detectedSubject = detectSubjectFromContent(cleaned, filename);
   const detectedTopic = detectTopicFromContent(cleaned, detectedSubject);
@@ -1050,7 +1068,7 @@ export function parseMCQsFromText(rawText: string, filename: string): Question[]
   }
 
   // Fallback: If no explicit numbered questions found, split by double newlines
-  const paragraphs = cleaned.split(/\n\s*\n/).filter((p) => p.trim().length > 30);
+  const paragraphs = cleaned.split(/\n\s*\n/).filter((p) => p.trim().length > 30 && !/[ÈR]{4,}/.test(p));
   if (paragraphs.length >= 1) {
     paragraphs.forEach((p, idx) => {
       const qNum = idx + 1;
@@ -1058,16 +1076,6 @@ export function parseMCQsFromText(rawText: string, filename: string): Question[]
       if (parsedQ) questions.push(parsedQ);
     });
     if (questions.length > 0) return questions;
-  }
-
-  // If file was specific Physics Basic Maths & Calculus DPP 1 (Saleem Sir)
-  if (/saleem|math|calculus/i.test(filename) || /saleem|calculus|hypotenuse/i.test(rawText)) {
-    return YAKEEN_PHYSICS_MATHS_DPP1_QUESTIONS.map(q => ({ ...q }));
-  }
-
-  // If file was specific Physical Chemistry DPP 1 (Sudhanshu Sir)
-  if (/sudhanshu|physical\s*chem/i.test(filename) || /sudhanshu/i.test(rawText)) {
-    return YAKEEN_CHEMISTRY_DPP1_QUESTIONS.map(q => ({ ...q }));
   }
 
   // Generate clean editable draft questions for this uploaded document
