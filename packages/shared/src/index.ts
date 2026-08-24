@@ -62,6 +62,8 @@ export interface Question {
   reviewedByAdmin?: boolean;
 }
 
+export type TestStatus = "draft" | "published" | "archived";
+
 export interface TestConfig {
   id: string;
   title: string;
@@ -76,7 +78,7 @@ export interface TestConfig {
   passingMarks: number;
   subjects: NEETSubject[];
   pattern: "NTA_NEET_2025" | "UNIT_TEST" | "CUSTOM";
-  status: "draft" | "published" | "archived";
+  status: TestStatus;
   createdAt: string;
   scheduledAt?: string;
   questions?: Question[];

@@ -9,51 +9,87 @@ export function Navbar() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("love_neet_user");
-    if (saved) {
-      try {
-        setCurrentUser(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      // Default to candidate demo
-      const demo: UserProfile = {
-        id: "user-cand-01",
-        name: "Dr. Aakash Sharma (Aspirant)",
-        email: "candidate@example.com",
-        role: "candidate",
-        targetYear: 2026,
-        rollNumber: "NEET2026-984210"
-      };
-      localStorage.setItem("love_neet_user", JSON.stringify(demo));
-      setCurrentUser(demo);
-    }
+    // 1. Fetch authenticated session from API
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setCurrentUser(data.user);
+          localStorage.setItem("love_neet_user", JSON.stringify(data.user));
+        } else {
+          const saved = localStorage.getItem("love_neet_user");
+          if (saved) {
+            try {
+              setCurrentUser(JSON.parse(saved));
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+      })
+      .catch(() => {
+        const saved = localStorage.getItem("love_neet_user");
+        if (saved) {
+          try {
+            setCurrentUser(JSON.parse(saved));
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      });
   }, []);
 
-  const switchRole = (role: "candidate" | "admin") => {
-    let user: UserProfile;
-    if (role === "admin") {
-      user = {
-        id: "user-admin-01",
-        name: "Dr. Sunita Deshmukh (HOD / Faculty)",
-        email: "admin@example.com",
-        role: "admin",
-        rollNumber: "FACULTY-NEET-01"
-      };
-    } else {
-      user = {
-        id: "user-cand-01",
-        name: "Dr. Aakash Sharma (Aspirant)",
-        email: "candidate@example.com",
-        role: "candidate",
-        targetYear: 2026,
-        rollNumber: "NEET2026-984210"
-      };
+  const switchRole = async (role: "candidate" | "admin") => {
+    const demoEmail = role === "admin" ? "admin@example.com" : "candidate@example.com";
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: demoEmail })
+      });
+      const data = await res.json();
+      if (data.user) {
+        localStorage.setItem("love_neet_user", JSON.stringify(data.user));
+        setCurrentUser(data.user);
+        window.location.reload();
+        return;
+      }
+    } catch (err) {
+      console.error("Quick switch error:", err);
     }
-    localStorage.setItem("love_neet_user", JSON.stringify(user));
-    setCurrentUser(user);
+
+    // Fallback
+    const fallbackUser: UserProfile =
+      role === "admin"
+        ? {
+            id: "user-admin-01",
+            name: "Dr. Sunita Deshmukh (Admin / HOD)",
+            email: "admin@example.com",
+            role: "admin",
+            rollNumber: "FACULTY-NEET-01"
+          }
+        : {
+            id: "user-cand-01",
+            name: "Dr. Aakash Sharma (Aspirant)",
+            email: "candidate@example.com",
+            role: "candidate",
+            targetYear: 2026,
+            rollNumber: "NEET2026-984210"
+          };
+    localStorage.setItem("love_neet_user", JSON.stringify(fallbackUser));
+    setCurrentUser(fallbackUser);
     window.location.reload();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    }
+    localStorage.removeItem("love_neet_user");
+    setCurrentUser(null);
+    window.location.href = "/auth";
   };
 
   return (
@@ -232,10 +268,24 @@ export function Navbar() {
             </button>
           </div>
 
-          <Link href="/auth" className="btn btn-primary btn-sm">
-            <User size={15} />
-            <span>{currentUser ? currentUser.name.split(" ")[1] || "Account" : "Sign In"}</span>
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Link href="/auth" className="btn btn-primary btn-sm" style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+              <User size={15} />
+              <span>{currentUser ? currentUser.name.split(" ")[1] || "Account" : "Sign In"}</span>
+            </Link>
+
+            {currentUser && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="btn btn-secondary btn-sm"
+                style={{ padding: "0.35rem 0.6rem", color: "var(--mute)" }}
+                title="Log Out"
+              >
+                <LogOut size={14} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </header>
