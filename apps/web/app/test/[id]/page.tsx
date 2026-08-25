@@ -47,9 +47,35 @@ export default function TestInstructionsPage({
     fetch(`/api/tests/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.test) setTest(data.test);
+        if (data.test) {
+          setTest(data.test);
+        } else {
+          // Fallback to local storage custom tests
+          try {
+            const customRaw = localStorage.getItem("love_neet_custom_tests");
+            if (customRaw) {
+              const customTests: TestConfig[] = JSON.parse(customRaw);
+              const found = customTests.find((t) => t.id === id);
+              if (found) setTest(found);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        try {
+          const customRaw = localStorage.getItem("love_neet_custom_tests");
+          if (customRaw) {
+            const customTests: TestConfig[] = JSON.parse(customRaw);
+            const found = customTests.find((t) => t.id === id);
+            if (found) setTest(found);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      })
       .finally(() => setLoading(false));
   }, [id]);
 

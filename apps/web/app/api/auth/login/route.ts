@@ -45,18 +45,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fallback check against memory store / default users
+    // Fallback check against memory store
     if (!authenticatedUser) {
-      const memUser =
-        store.getUserByEmail(normalizedEmail) ||
-        DEFAULT_USERS.find((u) => u.email.toLowerCase() === normalizedEmail);
-
+      const memUser = store.getUserByEmail(normalizedEmail);
       if (memUser) {
         authenticatedUser = memUser;
-      } else if (normalizedEmail.includes("admin")) {
-        authenticatedUser = DEFAULT_USERS[1];
-      } else if (normalizedEmail.includes("candidate") || normalizedEmail.includes("student")) {
-        authenticatedUser = DEFAULT_USERS[0];
       }
     }
 

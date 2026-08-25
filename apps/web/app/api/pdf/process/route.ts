@@ -3,6 +3,8 @@ import { store } from "@/lib/store";
 import { parseMCQsFromText } from "@/lib/pdf-parser";
 import { extractMCQsWithGemini } from "@/lib/gemini";
 import { Question, TestConfig } from "@/lib/types";
+import { connectToDatabase, isMongoDBConfigured } from "@/lib/mongodb";
+import { TestModel } from "@/lib/models/Test";
 
 export async function POST(req: NextRequest) {
   try {
@@ -89,6 +91,20 @@ export async function POST(req: NextRequest) {
     };
 
     store.createTest(autoCreatedTest);
+
+    // Persist to MongoDB if configured
+    if (isMongoDBConfigured()) {
+      try {
+        await connectToDatabase();
+        await TestModel.findOneAndUpdate(
+          { id: autoCreatedTest.id },
+          autoCreatedTest,
+          { upsert: true, new: true }
+        );
+      } catch (dbErr) {
+        console.warn("MongoDB test persistence warning:", dbErr);
+      }
+    }
 
     const updatedJob = store.updatePDFJob(jobId, {
       status: "ready_for_review",

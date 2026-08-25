@@ -28,13 +28,38 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let customTests: TestConfig[] = [];
+    try {
+      const customRaw = localStorage.getItem("love_neet_custom_tests");
+      if (customRaw) {
+        customTests = JSON.parse(customRaw);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     fetch("/api/analytics")
       .then((res) => res.json())
       .then((data) => {
         if (data.metrics) setMetrics(data.metrics);
-        if (data.tests) setTests(data.tests);
+        const apiTests: TestConfig[] = data.tests || [];
+        const combined = [...customTests];
+        const seenIds = new Set(customTests.map((t) => t.id));
+
+        for (const t of apiTests) {
+          if (!seenIds.has(t.id)) {
+            combined.push(t);
+            seenIds.add(t.id);
+          }
+        }
+        setTests(combined);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        if (customTests.length > 0) {
+          setTests(customTests);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 

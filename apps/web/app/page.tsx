@@ -19,7 +19,7 @@ import {
   TrendingUp,
   Zap
 } from "lucide-react";
-import { DEFAULT_TESTS } from "@/lib/neet-data";
+import { FeaturedTests } from "@/components/FeaturedTests";
 
 export default function HomePage() {
   return (
@@ -74,7 +74,7 @@ export default function HomePage() {
 
                 {/* CTA Cluster */}
                 <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
-                  <Link href={`/test/${DEFAULT_TESTS[0].id}`} className="btn btn-primary btn-lg">
+                  <Link href="/test/test-neet-grand-01" className="btn btn-primary btn-lg">
                     <span>Take Free Grand Mock</span>
                     <ArrowRight size={18} />
                   </Link>
@@ -106,7 +106,7 @@ export default function HomePage() {
                     <span>NTA NEET 200-Min Pattern</span>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8125rem", fontWeight: "600", color: "var(--body)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8125rem", fontWeight: "600", color: "var(--teal)" }}>
                     <CheckCircle size={18} color="var(--teal)" />
                     <span>+4 / -1 Marking Engine</span>
                   </div>
@@ -153,7 +153,7 @@ export default function HomePage() {
                         Physics • Chemistry • Botany • Zoology (720 Marks)
                       </div>
                     </div>
-                    <Link href={`/test/${DEFAULT_TESTS[0].id}`} className="btn btn-primary btn-sm">
+                    <Link href="/test/test-neet-grand-01" className="btn btn-primary btn-sm">
                       Start Test
                     </Link>
                   </div>
@@ -306,67 +306,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2rem" }}>
-              {DEFAULT_TESTS.map((test) => (
-                <div
-                  key={test.id}
-                  className="card"
-                  style={{
-                    padding: "2rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between"
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                      <span className="badge badge-teal">{test.pattern}</span>
-                      <span className="badge badge-blue">{test.durationMinutes} Minutes</span>
-                    </div>
-
-                    <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--ink)", marginBottom: "0.75rem", lineHeight: "1.4" }}>
-                      {test.title}
-                    </h3>
-
-                    <p className="body-sm" style={{ marginBottom: "1.5rem" }}>
-                      {test.description}
-                    </p>
-
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "1.5rem" }}>
-                      {test.subjects.map((s) => (
-                        <span key={s} className="badge badge-gray" style={{ fontSize: "0.75rem" }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      paddingTop: "1.25rem",
-                      borderTop: "1px solid var(--hairline)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                  >
-                    <div>
-                      <span style={{ fontSize: "0.75rem", color: "var(--mute)", display: "block" }}>
-                        Total Marks
-                      </span>
-                      <strong style={{ fontSize: "1.125rem", color: "var(--ink)" }}>
-                        {test.totalMarks} Marks
-                      </strong>
-                    </div>
-
-                    <Link href={`/test/${test.id}`} className="btn btn-primary btn-sm">
-                      <span>View Test</span>
-                      <ArrowRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <FeaturedTests />
           </div>
         </section>
 
@@ -404,7 +344,7 @@ export default function HomePage() {
             </p>
 
             <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
-              <Link href={`/test/${DEFAULT_TESTS[0].id}`} className="btn btn-primary btn-lg">
+              <Link href="/test/test-neet-grand-01" className="btn btn-primary btn-lg">
                 <span>Start Practice Now</span>
                 <ArrowRight size={18} />
               </Link>

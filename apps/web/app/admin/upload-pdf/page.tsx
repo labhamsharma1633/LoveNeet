@@ -204,6 +204,17 @@ export default function UploadPDFPage() {
         }
         if (processData.autoCreatedTest) {
           setAutoCreatedTest(processData.autoCreatedTest);
+          try {
+            const existingRaw = localStorage.getItem("love_neet_custom_tests");
+            const existing: TestConfig[] = existingRaw ? JSON.parse(existingRaw) : [];
+            const filtered = existing.filter((t: TestConfig) => t.id !== processData.autoCreatedTest.id);
+            localStorage.setItem(
+              "love_neet_custom_tests",
+              JSON.stringify([processData.autoCreatedTest, ...filtered])
+            );
+          } catch (e) {
+            console.error("Custom test save error:", e);
+          }
         }
         setProcessing(false);
       }, 2400);

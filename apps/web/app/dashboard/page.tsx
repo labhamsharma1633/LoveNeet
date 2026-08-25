@@ -31,18 +31,50 @@ export default function CandidateDashboard() {
     const saved = localStorage.getItem("love_neet_user");
     if (saved) {
       try {
-        setUser(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed?.name?.includes("Sunita")) {
+          localStorage.removeItem("love_neet_user");
+          setUser(null);
+        } else {
+          setUser(parsed);
+        }
       } catch (e) {
         console.error(e);
       }
     }
 
+    // Load custom tests saved locally
+    let customTests: TestConfig[] = [];
+    try {
+      const customRaw = localStorage.getItem("love_neet_custom_tests");
+      if (customRaw) {
+        customTests = JSON.parse(customRaw);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     fetch("/api/tests?role=candidate")
       .then((res) => res.json())
       .then((data) => {
-        if (data.tests) setTests(data.tests);
+        const apiTests: TestConfig[] = data.tests || [];
+        const combined = [...customTests];
+        const seenIds = new Set(customTests.map((t) => t.id));
+
+        for (const t of apiTests) {
+          if (!seenIds.has(t.id)) {
+            combined.push(t);
+            seenIds.add(t.id);
+          }
+        }
+        setTests(combined);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        if (customTests.length > 0) {
+          setTests(customTests);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -98,15 +130,20 @@ export default function CandidateDashboard() {
                   <span className="badge badge-teal">Candidate Portal</span>
                 </div>
                 <div style={{ display: "flex", gap: "1rem", marginTop: "0.35rem", fontSize: "0.8125rem", color: "var(--body)" }}>
-                  <span>Roll No: <strong>{user?.rollNumber || "NEET2026-984210"}</strong></span>
+                  <span>Roll No: <strong>{user?.rollNumber || "NEET-ASPIRANT"}</strong></span>
                   <span>•</span>
                   <span>Target: <strong>NEET {user?.targetYear || 2026} (MBBS)</strong></span>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <Link href="/test/test-neet-grand-01" className="btn btn-primary">
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              {!user && (
+                <Link href="/auth?role=candidate" className="btn btn-secondary">
+                  <span>Sign In as Candidate</span>
+                </Link>
+              )}
+              <Link href={`/test/${tests[0]?.id || "test-neet-grand-01"}`} className="btn btn-primary">
                 <Play size={16} />
                 <span>Resume Active Mock</span>
               </Link>

@@ -21,13 +21,6 @@ export const DEFAULT_USERS: UserProfile[] = [
     role: "candidate",
     targetYear: 2026,
     rollNumber: "NEET2026-984210"
-  },
-  {
-    id: "user-admin-01",
-    name: "Dr. Sunita Deshmukh (Admin / HOD)",
-    email: "admin@example.com",
-    role: "admin",
-    rollNumber: "FACULTY-NEET-01"
   }
 ];
 

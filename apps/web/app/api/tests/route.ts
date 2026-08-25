@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { TestConfig } from "@/lib/types";
+import { connectToDatabase, isMongoDBConfigured } from "@/lib/mongodb";
+import { TestModel } from "@/lib/models/Test";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -8,6 +10,25 @@ export async function GET(req: NextRequest) {
   const role = searchParams.get("role");
 
   let tests = store.getTests();
+
+  // If MongoDB is configured, merge database tests
+  if (isMongoDBConfigured()) {
+    try {
+      await connectToDatabase();
+      const dbTests = await TestModel.find({}).lean();
+      if (dbTests && dbTests.length > 0) {
+        const memIds = new Set(tests.map((t) => t.id));
+        for (const dbt of dbTests) {
+          if (!memIds.has(dbt.id)) {
+            tests.unshift(dbt as unknown as TestConfig);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("MongoDB test fetch warning:", e);
+    }
+  }
+
   if (role === "admin" && status) {
     tests = tests.filter((t) => t.status === status);
   } else {
@@ -71,6 +92,20 @@ export async function POST(req: NextRequest) {
     };
 
     store.createTest(newTest);
+
+    if (isMongoDBConfigured()) {
+      try {
+        await connectToDatabase();
+        await TestModel.findOneAndUpdate(
+          { id: newTest.id },
+          newTest,
+          { upsert: true, new: true }
+        );
+      } catch (dbErr) {
+        console.warn("MongoDB test persistence warning:", dbErr);
+      }
+    }
+
     return NextResponse.json({ success: true, test: newTest }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Failed to create test" }, { status: 500 });

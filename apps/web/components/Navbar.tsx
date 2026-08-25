@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UserProfile } from "@/lib/types";
-import { Activity, BookOpen, FileText, LayoutDashboard, Shield, Sparkles, User, LogOut } from "lucide-react";
+import { Activity, BookOpen, FileText, Shield, Sparkles, User, LogOut, GraduationCap } from "lucide-react";
 
 export function Navbar() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    // 1. Fetch authenticated session from API
+    // Fetch authenticated session from API
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((data) => {
@@ -20,7 +20,14 @@ export function Navbar() {
           const saved = localStorage.getItem("love_neet_user");
           if (saved) {
             try {
-              setCurrentUser(JSON.parse(saved));
+              const parsed = JSON.parse(saved);
+              // Ensure old stale demo accounts aren't resurrected
+              if (parsed?.name?.includes("Sunita")) {
+                localStorage.removeItem("love_neet_user");
+                setCurrentUser(null);
+              } else {
+                setCurrentUser(parsed);
+              }
             } catch (e) {
               console.error(e);
             }
@@ -31,55 +38,19 @@ export function Navbar() {
         const saved = localStorage.getItem("love_neet_user");
         if (saved) {
           try {
-            setCurrentUser(JSON.parse(saved));
+            const parsed = JSON.parse(saved);
+            if (parsed?.name?.includes("Sunita")) {
+              localStorage.removeItem("love_neet_user");
+              setCurrentUser(null);
+            } else {
+              setCurrentUser(parsed);
+            }
           } catch (e) {
             console.error(e);
           }
         }
       });
   }, []);
-
-  const switchRole = async (role: "candidate" | "admin") => {
-    const demoEmail = role === "admin" ? "admin@example.com" : "candidate@example.com";
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: demoEmail })
-      });
-      const data = await res.json();
-      if (data.user) {
-        localStorage.setItem("love_neet_user", JSON.stringify(data.user));
-        setCurrentUser(data.user);
-        window.location.reload();
-        return;
-      }
-    } catch (err) {
-      console.error("Quick switch error:", err);
-    }
-
-    // Fallback
-    const fallbackUser: UserProfile =
-      role === "admin"
-        ? {
-            id: "user-admin-01",
-            name: "Dr. Sunita Deshmukh (Admin / HOD)",
-            email: "admin@example.com",
-            role: "admin",
-            rollNumber: "FACULTY-NEET-01"
-          }
-        : {
-            id: "user-cand-01",
-            name: "Dr. Aakash Sharma (Aspirant)",
-            email: "candidate@example.com",
-            role: "candidate",
-            targetYear: 2026,
-            rollNumber: "NEET2026-984210"
-          };
-    localStorage.setItem("love_neet_user", JSON.stringify(fallbackUser));
-    setCurrentUser(fallbackUser);
-    window.location.reload();
-  };
 
   const handleLogout = async () => {
     try {
@@ -98,7 +69,7 @@ export function Navbar() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        backgroundColor: "rgba(255, 255, 255, 0.94)",
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--hairline)",
         height: "68px",
@@ -148,7 +119,7 @@ export function Navbar() {
         </Link>
 
         {/* Navigation Links */}
-        <nav style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
           <Link
             href="/dashboard"
             style={{
@@ -164,23 +135,6 @@ export function Navbar() {
           >
             <BookOpen size={16} />
             <span>Test Series</span>
-          </Link>
-
-          <Link
-            href="/admin"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              fontSize: "0.875rem",
-              fontWeight: "600",
-              color: "var(--body)",
-              padding: "0.4rem 0.6rem",
-              borderRadius: "var(--radius-sm)"
-            }}
-          >
-            <Shield size={16} />
-            <span>Admin Suite</span>
           </Link>
 
           <Link
@@ -218,74 +172,97 @@ export function Navbar() {
             <FileText size={16} />
             <span>PDF to MCQ</span>
           </Link>
-        </nav>
 
-        {/* User Role Switcher & Profile */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div
+          <Link
+            href="/admin"
             style={{
               display: "flex",
               alignItems: "center",
-              backgroundColor: "var(--canvas-soft-2)",
-              borderRadius: "var(--radius-pill)",
-              padding: "0.2rem",
-              border: "1px solid var(--hairline)"
+              gap: "0.4rem",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+              color: "var(--body)",
+              padding: "0.4rem 0.6rem",
+              borderRadius: "var(--radius-sm)"
             }}
           >
-            <button
-              onClick={() => switchRole("candidate")}
-              style={{
-                border: "none",
-                background: currentUser?.role === "candidate" ? "var(--canvas)" : "transparent",
-                color: currentUser?.role === "candidate" ? "var(--primary)" : "var(--mute)",
-                fontWeight: "700",
-                fontSize: "0.75rem",
-                padding: "0.3rem 0.75rem",
-                borderRadius: "var(--radius-pill)",
-                boxShadow: currentUser?.role === "candidate" ? "var(--shadow-1)" : "none",
-                cursor: "pointer",
-                transition: "all 0.15s ease"
-              }}
-            >
-              Candidate Demo
-            </button>
-            <button
-              onClick={() => switchRole("admin")}
-              style={{
-                border: "none",
-                background: currentUser?.role === "admin" ? "var(--ink)" : "transparent",
-                color: currentUser?.role === "admin" ? "#ffffff" : "var(--mute)",
-                fontWeight: "700",
-                fontSize: "0.75rem",
-                padding: "0.3rem 0.75rem",
-                borderRadius: "var(--radius-pill)",
-                boxShadow: currentUser?.role === "admin" ? "var(--shadow-1)" : "none",
-                cursor: "pointer",
-                transition: "all 0.15s ease"
-              }}
-            >
-              Admin Demo
-            </button>
-          </div>
+            <Shield size={16} />
+            <span>Faculty Suite</span>
+          </Link>
+        </nav>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Link href="/auth" className="btn btn-primary btn-sm" style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-              <User size={15} />
-              <span>{currentUser ? currentUser.name.split(" ")[1] || "Account" : "Sign In"}</span>
-            </Link>
+        {/* User Authentication & Profile */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {currentUser ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.35rem 0.75rem",
+                  backgroundColor: "var(--canvas-soft-2)",
+                  borderRadius: "var(--radius-pill)",
+                  border: "1px solid var(--hairline)"
+                }}
+              >
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    backgroundColor: currentUser.role === "admin" ? "var(--ink)" : "var(--primary)",
+                    color: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.75rem",
+                    fontWeight: "700"
+                  }}
+                >
+                  {currentUser.role === "admin" ? "F" : "C"}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <span style={{ fontSize: "0.8125rem", fontWeight: "700", color: "var(--ink)", lineHeight: 1.2 }}>
+                    {currentUser.name}
+                  </span>
+                  <span style={{ fontSize: "0.6875rem", color: "var(--mute)", fontWeight: "500" }}>
+                    {currentUser.role === "admin" ? "Faculty / Admin" : "Candidate (Aspirant)"}
+                  </span>
+                </div>
+              </div>
 
-            {currentUser && (
               <button
                 type="button"
                 onClick={handleLogout}
                 className="btn btn-secondary btn-sm"
-                style={{ padding: "0.35rem 0.6rem", color: "var(--mute)" }}
+                style={{ padding: "0.45rem 0.65rem", color: "var(--mute)" }}
                 title="Log Out"
               >
                 <LogOut size={14} />
+                <span style={{ fontSize: "0.75rem" }}>Logout</span>
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Link
+                href="/auth?role=candidate"
+                className="btn btn-primary btn-sm"
+                style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}
+              >
+                <GraduationCap size={15} />
+                <span>Candidate Login</span>
+              </Link>
+              <Link
+                href="/auth?role=admin"
+                className="btn btn-secondary btn-sm"
+                style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}
+              >
+                <Shield size={14} />
+                <span>Faculty Portal</span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -68,10 +68,23 @@ export default function LiveTestPage({
     fetch(`/api/tests/${testId}`)
       .then((res) => res.json())
       .then(async (testData) => {
-        if (!testData.test) throw new Error("Test not found");
-        setTest(testData.test);
+        let loadedTest = testData.test;
+        if (!loadedTest) {
+          try {
+            const customRaw = localStorage.getItem("love_neet_custom_tests");
+            if (customRaw) {
+              const customTests: TestConfig[] = JSON.parse(customRaw);
+              loadedTest = customTests.find((t) => t.id === testId);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
 
-        const firstQ = testData.test.questions?.[0];
+        if (!loadedTest) throw new Error("Test not found");
+        setTest(loadedTest);
+
+        const firstQ = loadedTest.questions?.[0];
         if (firstQ) {
           setActiveSubject(firstQ.subject);
           setActiveSection(firstQ.section);
@@ -81,34 +94,64 @@ export default function LiveTestPage({
         // 2. Fetch or create attempt
         let attId = attemptIdParam;
         if (!attId) {
-          const createRes = await fetch("/api/attempts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              testId: testData.test.id,
-              candidateId: user?.id || "user-cand-01",
-              candidateName: user?.name || "Medical Aspirant"
-            })
-          });
-          const createData = await createRes.json();
-          attId = createData.attempt.id;
+          try {
+            const createRes = await fetch("/api/attempts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                testId: loadedTest.id,
+                candidateId: user?.id || "user-cand-01",
+                candidateName: user?.name || "Medical Aspirant"
+              })
+            });
+            const createData = await createRes.json();
+            if (createData.attempt) {
+              attId = createData.attempt.id;
+            }
+          } catch (attErr) {
+            console.warn("Attempt create API fallback:", attErr);
+          }
         }
 
         if (attId) {
-          const attRes = await fetch(`/api/attempts/${attId}`);
-          const attData = await attRes.json();
-          if (attData.attempt) {
-            setAttempt(attData.attempt);
-            if (attData.attempt.responses) {
-              setResponses(attData.attempt.responses);
+          try {
+            const attRes = await fetch(`/api/attempts/${attId}`);
+            const attData = await attRes.json();
+            if (attData.attempt) {
+              setAttempt(attData.attempt);
+              if (attData.attempt.responses) {
+                setResponses(attData.attempt.responses);
+              }
+              if (attData.attempt.currentQuestionId) {
+                setCurrentQuestionId(attData.attempt.currentQuestionId);
+              }
             }
-            if (attData.attempt.currentQuestionId) {
-              setCurrentQuestionId(attData.attempt.currentQuestionId);
-            }
+          } catch (fetchAttErr) {
+            console.warn("Attempt fetch API fallback:", fetchAttErr);
           }
         }
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        try {
+          const customRaw = localStorage.getItem("love_neet_custom_tests");
+          if (customRaw) {
+            const customTests: TestConfig[] = JSON.parse(customRaw);
+            const found = customTests.find((t) => t.id === testId);
+            if (found) {
+              setTest(found);
+              const firstQ = found.questions?.[0];
+              if (firstQ) {
+                setActiveSubject(firstQ.subject);
+                setActiveSection(firstQ.section);
+                setCurrentQuestionId(firstQ.id);
+              }
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      })
       .finally(() => setLoading(false));
   }, [testId, attemptIdParam]);
 

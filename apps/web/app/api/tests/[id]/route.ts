@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { YAKEEN_CHEMISTRY_DPP1_QUESTIONS } from "@/lib/pdf-parser";
+import { connectToDatabase, isMongoDBConfigured } from "@/lib/mongodb";
+import { TestModel } from "@/lib/models/Test";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const test = store.getTestById(id);
+  let test = store.getTestById(id);
+
+  if (!test && isMongoDBConfigured()) {
+    try {
+      await connectToDatabase();
+      const dbTest = await TestModel.findOne({ id }).lean();
+      if (dbTest) {
+        test = dbTest as any;
+      }
+    } catch (e) {
+      console.warn("MongoDB test lookup warning:", e);
+    }
+  }
 
   if (!test) {
     return NextResponse.json({ error: "Test not found" }, { status: 404 });
