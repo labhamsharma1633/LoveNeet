@@ -12,6 +12,7 @@ import {
 import { DEFAULT_TESTS, SAMPLE_NEET_QUESTIONS } from "./neet-data";
 import { YAKEEN_CHEMISTRY_DPP1_QUESTIONS } from "./pdf-parser";
 import { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS } from "./yakeen-test01-data";
+import { YAKEEN_NEET_2027_PRACTICE_TEST_02_QUESTIONS } from "./yakeen-test02-data";
 
 export const DEFAULT_USERS: UserProfile[] = [
   {
@@ -212,7 +213,9 @@ class MemoryStore {
 
     let testQuestions = test.questions;
     if (!testQuestions || testQuestions.length === 0) {
-      if (test.id.includes("pt01") || test.id.includes("2027") || test.title.includes("Practice Test 01") || test.title.includes("180 Questions")) {
+      if (test.id.includes("pt02") || test.title.includes("Practice Test 02")) {
+        testQuestions = YAKEEN_NEET_2027_PRACTICE_TEST_02_QUESTIONS;
+      } else if (test.id.includes("pt01") || test.title.includes("Practice Test 01")) {
         testQuestions = YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS;
       } else if (test.id.includes("yakeen") || test.id.includes("chem") || test.title.includes("Chemistry")) {
         testQuestions = YAKEEN_CHEMISTRY_DPP1_QUESTIONS;

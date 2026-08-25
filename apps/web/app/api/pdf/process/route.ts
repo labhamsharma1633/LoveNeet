@@ -54,22 +54,37 @@ export async function POST(req: NextRequest) {
       .replace(/[_-]+/g, " ")
       .trim();
 
+    const isPT02 = /test\s*0?2|pt\s*0?2/i.test(job.filename) || /Practice Test\s*-\s*0?2/i.test(textToParse || "");
+    const isPT01 = (/test\s*0?1|pt\s*0?1/i.test(job.filename) || /Practice Test\s*-\s*0?1/i.test(textToParse || "")) && !isPT02;
+
     const formattedTitle = cleanName
       ? cleanName.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
       : `NEET Assessment ${new Date().toLocaleDateString()}`;
 
-    const testTitle = formattedTitle.length > 3 ? formattedTitle : `NEET Test: ${job.filename}`;
-    const testCode = `NEET-${cleanName.slice(0, 8).toUpperCase().replace(/\s+/g, "")}-${Date.now().toString().slice(-4)}`;
+    let computedTitle = formattedTitle.length > 3 ? formattedTitle : `NEET Test: ${job.filename}`;
+    let computedId = `test-pdf-${Date.now()}`;
+    let computedCode = `NEET-${cleanName.slice(0, 8).toUpperCase().replace(/\s+/g, "")}-${Date.now().toString().slice(-4)}`;
 
     const isFullMock = extractedDrafts.length >= 90;
     const detectedSubjects = Array.from(new Set(extractedDrafts.map((q) => q.subject)));
 
+    if (isPT02) {
+      computedId = "test-yakeen-neet-2027-pt02";
+      computedTitle = `Yakeen NEET 2.0 (2027) — Practice Test 02 (Full Mock: ${extractedDrafts.length} Questions)`;
+      computedCode = "YAKEEN-NEET-2027-PT02";
+    } else if (isPT01) {
+      computedId = "test-yakeen-neet-2027-pt01";
+      computedTitle = `Yakeen NEET 2.0 (2027) — Practice Test 01 (Full Mock: ${extractedDrafts.length} Questions)`;
+      computedCode = "YAKEEN-NEET-2027-PT01";
+    } else if (isFullMock) {
+      computedId = `test-full-mock-${Date.now()}`;
+      computedTitle = `${computedTitle} (Full Mock: ${extractedDrafts.length} Questions)`;
+    }
+
     const autoCreatedTest: TestConfig = {
-      id: isFullMock ? `test-yakeen-neet-2027-pt01` : `test-pdf-${Date.now()}`,
-      title: isFullMock
-        ? `Yakeen NEET 2.0 (2027) — Practice Test 01 (Full Mock: ${extractedDrafts.length} Questions)`
-        : (testTitle.length > 3 ? testTitle : `NEET Test: ${job.filename}`),
-      code: isFullMock ? `YAKEEN-NEET-2027-PT01` : testCode,
+      id: computedId,
+      title: computedTitle,
+      code: computedCode,
       description: `Auto-generated live test session from uploaded question paper: ${job.filename}. Includes ${extractedDrafts.length} authentic MCQs across ${detectedSubjects.join(", ")} with NTA +4 / -1 negative marking scheme.`,
       instructions: [
         `Total questions: ${extractedDrafts.length}. Attempt all questions across ${detectedSubjects.join(", ")}.`,

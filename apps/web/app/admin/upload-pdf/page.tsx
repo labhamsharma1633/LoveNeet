@@ -595,6 +595,56 @@ Answer: A`}
                           width: "40px",
                           height: "40px",
                           borderRadius: "10px",
+                          backgroundColor: "var(--teal)",
+                          color: "#ffffff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <Sparkles size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "0.95rem", fontWeight: "800", color: "var(--ink)" }}>
+                          Yakeen NEET 2.0 (2027) — Practice Test 02 (Full 180 Questions)
+                        </div>
+                        <div style={{ fontSize: "0.78rem", color: "var(--body)", marginTop: "0.15rem" }}>
+                          Vectors (45 Qs) • Some Basic Concepts (45 Qs) • Cell (45 Qs) • Structural Org & Frog (45 Qs) • 720 Marks
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleUploadAndProcess("Yakeen_NEET_2.0_2027_Practice_Test_02.pdf")}
+                      disabled={uploading}
+                      className="btn btn-teal btn-sm"
+                      style={{ fontWeight: "700" }}
+                    >
+                      <Cpu size={14} />
+                      <span>Auto-Create PT-02 Mock Test</span>
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "1.25rem",
+                      backgroundColor: "var(--primary-surface)",
+                      borderRadius: "var(--radius-md)",
+                      border: "1.5px solid var(--primary-light)",
+                      flexWrap: "wrap",
+                      gap: "1rem"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "10px",
                           backgroundColor: "var(--primary)",
                           color: "#ffffff",
                           display: "flex",
@@ -622,7 +672,7 @@ Answer: A`}
                       style={{ fontWeight: "700" }}
                     >
                       <Cpu size={14} />
-                      <span>Auto-Create 180Q Live Mock Test</span>
+                      <span>Auto-Create PT-01 Mock Test</span>
                     </button>
                   </div>
 

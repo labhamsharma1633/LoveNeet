@@ -31,16 +31,28 @@ const INITIAL_FALLBACK_TESTS: Partial<TestConfig>[] = [
     subjects: ["Zoology"]
   },
   {
-    id: "test-physics-circuits-03",
-    title: "NEET Physics Rapid Sprint: Current Electricity & Optics",
-    code: "NEET-UNIT-PHY-03",
-    description: "Rigorous problem sets covering Wheatstone bridges, Kirchhoff's laws, potentiometer sensitivity, and optical microscope magnification.",
-    pattern: "UNIT_TEST",
-    durationMinutes: 30,
-    totalMarks: 8,
+    id: "test-yakeen-neet-2027-pt02",
+    title: "Yakeen NEET 2.0 (2027) — Practice Test 02 (Full Mock: 180 Questions)",
+    code: "YAKEEN-NEET-2027-PT02",
+    description: "Official 180-question mock test booklet (720 Marks, 180 Minutes). Covers Vectors, Some Basic Concepts of Chemistry, Cell - Unit of Life, and Structural Organisation in Animals & Frog.",
+    pattern: "NTA_NEET_2025",
+    durationMinutes: 180,
+    totalMarks: 720,
     positiveMarks: 4,
     negativeMarks: 1,
-    subjects: ["Physics"]
+    subjects: ["Physics", "Chemistry", "Botany", "Zoology"]
+  },
+  {
+    id: "test-yakeen-neet-2027-pt01",
+    title: "Yakeen NEET 2.0 (2027) — Practice Test 01 (Full Syllabus: 180 Questions)",
+    code: "YAKEEN-NEET-2027-PT01",
+    description: "Official 180-question mock test booklet (720 Marks, 180 Minutes). Covers Basic Maths, Physical Chemistry, Cell Biology, and Tissue Systems.",
+    pattern: "NTA_NEET_2025",
+    durationMinutes: 180,
+    totalMarks: 720,
+    positiveMarks: 4,
+    negativeMarks: 1,
+    subjects: ["Physics", "Chemistry", "Botany", "Zoology"]
   }
 ];
 

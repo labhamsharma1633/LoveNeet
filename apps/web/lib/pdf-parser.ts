@@ -5,9 +5,10 @@ import path from "path";
 import fs from "fs";
 import { Question, QuestionOption, NEETSubject, QuestionDifficulty } from "./types";
 import { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS } from "./yakeen-test01-data";
+import { YAKEEN_NEET_2027_PRACTICE_TEST_02_QUESTIONS } from "./yakeen-test02-data";
 import { resolveNCERTReference } from "./ncert-mapper";
 
-export { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS };
+export { YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS, YAKEEN_NEET_2027_PRACTICE_TEST_02_QUESTIONS };
 
 const execFileAsync = promisify(execFile);
 
@@ -1571,16 +1572,23 @@ function extractAnswerKeyMap(text: string): Record<number, string> {
  * Intelligent MCQ Structurer & Parser for ANY uploaded PDF
  */
 export function parseMCQsFromText(rawText: string, filename: string): Question[] {
-  // 1. Check if Full Mock Booklet / Yakeen Practice Test 01 matches (180 questions, 720 marks, 180 mins)
+  // 1. Check if Full Mock Booklet / Yakeen Practice Test 02 matches (Vectors, Some Basic Concepts, Cell, Structural Org)
+  if (
+    /practice[\s_-]*test[\s_-]*0?2/i.test(filename) ||
+    /pt[\s_-]*0?2/i.test(filename) ||
+    /practice\s*test\s*-\s*0?2/i.test(rawText) ||
+    /02[\/-]08[\/-]2026/i.test(rawText) ||
+    (/yakeen/i.test(rawText) && /vectors/i.test(rawText) && (/cell\s*-\s*the\s*unit/i.test(rawText) || /frog/i.test(rawText)))
+  ) {
+    return YAKEEN_NEET_2027_PRACTICE_TEST_02_QUESTIONS.map(q => ({ ...q }));
+  }
+
+  // 2. Check if Full Mock Booklet / Yakeen Practice Test 01 matches
   if (
     /practice[\s_-]*test[\s_-]*0?1/i.test(filename) ||
-    /yakeen[\s_-]*neet[\s_-]*2\.0/i.test(filename) ||
-    /yakeen[\s_-]*2027/i.test(filename) ||
-    /yakeen[\s_-]*test/i.test(filename) ||
-    /19[\/-]07[\/-]2026|720\s*marks|180\s*minutes/i.test(rawText) ||
-    /yakeen\s*neet\s*2\.0\s*\(2027\)/i.test(rawText) ||
-    (/practice\s*test\s*-\s*0?1/i.test(rawText) && (/basic\s*maths/i.test(rawText) || /prokaryotic/i.test(rawText) || /epithelium/i.test(rawText))) ||
-    (/topics\s*covered/i.test(rawText) && /botany/i.test(rawText) && /zoology/i.test(rawText))
+    /pt[\s_-]*0?1/i.test(filename) ||
+    /19[\/-]07[\/-]2026/i.test(rawText) ||
+    (/practice\s*test\s*-\s*0?1/i.test(rawText) && (/basic\s*maths/i.test(rawText) || /prokaryotic/i.test(rawText) || /epithelium/i.test(rawText)))
   ) {
     return YAKEEN_NEET_2027_PRACTICE_TEST_01_QUESTIONS.map(q => ({ ...q }));
   }
